@@ -34,7 +34,7 @@
 .modalContainer .cerrar_modal{
     cursor:move;
     overflow:auto;
-    background-color:#58abb7;
+    background-color:darkred;
     
 }
 .modalContainer .close:hover,

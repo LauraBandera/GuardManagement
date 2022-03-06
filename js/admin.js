@@ -55,8 +55,8 @@ function editar_grupos(hora, dia, cod_usuario, aula, id_aula) {
         output += "<form onsubmit='add_grupo(\"" + dia + "\", \"" + hora + "\", \"" + cod_usuario + "\");event.preventDefault();'>";
         if (aula != "Sin asignar o sin aula") {
             output += "<label>Grupo:</label>";
-            output += "<select name='grupos_libres' id='grupos_libres' onchange='comprobar_grupo(\"" + dia + "\", \"" + hora + "\");event.preventDefault();'>";
-            grupos_libres(dia, hora, cod_usuario);
+            output += "<select name='grupos_libres' id='grupos_libres' onchange='comprobar_grupo(\"" + dia + "\", \"" + hora + "\", \"" + cod_usuario + "\", \"" + aula + "\", \"" + id_aula + "\");event.preventDefault();'>";
+            grupos_libres(dia, hora, cod_usuario, aula);
             output += "</select>";
 
             output += "<label>Aula:</label><select name='aulas' id='aulas'>";
@@ -86,28 +86,44 @@ function editar_grupos(hora, dia, cod_usuario, aula, id_aula) {
  * @param {*} dia 
  * @param {*} hora 
  */
-function comprobar_grupo(dia, hora) {
+function comprobar_grupo(dia, hora, cod_usuario, aula, id_aula) {
     let grupo_select = $("#grupos_libres").val().split("|");
-    if (grupo_select[1].match(/^[a-zA-Z]/)) {
-        $.ajax({
-            url: encodeURI(DIR_SERV + "/aulasLibres/" + dia + "/" + hora),
-            type: "GET",
-            dataType: "json"
-        }).done(function (data) {
-            let output = "<optgroup label='Libres'>";
-            $.each(data.aulas_libres, function (key, value) {
-                if (value.nombre == "Sin asignar o sin aula") {
-                    output += "<option selected value='" + value.id_aula + "|" + value.nombre + "'>" + value.nombre + "</option>";
-                }
-            });
+    
+    $.ajax({
+        url: encodeURI(DIR_SERV + "/tieneGrupo/" + dia + "/" + hora + "/" + cod_usuario),
+        type: "GET",
+        dataType: "json"
+    }).done(function (data) {
+        if(!data.tiene_grupo){
+            if (grupo_select[1].match(/^[a-zA-Z]/)) {
+                $.ajax({
+                    url: encodeURI(DIR_SERV + "/aulasLibres/" + dia + "/" + hora),
+                    type: "GET",
+                    dataType: "json"
+                }).done(function (data) {
+                    let output = "<optgroup label='Libres'>";
+                    $.each(data.aulas_libres, function (key, value) {
+                        if (value.nombre == "Sin asignar o sin aula") {
+                            output += "<option selected value='" + value.id_aula + "|" + value.nombre + "'>" + value.nombre + "</option>";
+                        }
+                    });
+                    $("select#aulas").html("");
+                    $("select#aulas").html(output);
+                }).fail(function (a, b) {
+                    cargar_vista_error(error_ajax_jquery(a, b));
+                });
+            }else{
+                aulas(dia, hora);
+            }
+        }else{
+            let output = "<option value='" + id_aula + "|" + aula + "'>" + aula + "</option>";
             $("select#aulas").html("");
             $("select#aulas").html(output);
-        }).fail(function (a, b) {
-            cargar_vista_error(error_ajax_jquery(a, b));
-        });
-    }else{
-        aulas(dia, hora);
-    }
+        }
+    }).fail(function (a, b) {
+        cargar_vista_error(error_ajax_jquery(a, b));
+    });
+    
 }
 
 /**
@@ -201,7 +217,7 @@ function nuevaAula(dia,hora,id_usuarios_camb, cod_usuario, grupo){
  * @param {*} hora 
  * @param {*} cod_usuario 
  */
-function grupos_libres(dia, hora, cod_usuario) {
+function grupos_libres(dia, hora, cod_usuario, aula) {
     $.ajax({
         url: encodeURI(DIR_SERV + "/gruposLibres/" + dia + "/" + hora + "/" + cod_usuario),
         type: "GET",
@@ -212,14 +228,17 @@ function grupos_libres(dia, hora, cod_usuario) {
             if (value.nombre.match(/^[^a-zA-Z]/)) output += "<option value='" + value.id_grupo + "|" + value.nombre + "'>" + value.nombre + "</option>";
         });
 
-        output += "<optgroup label='Sin Aula'>";
-        $.each(data.grupos, function (key, value) {
-            if (value.nombre == "GUARD") {
-                if (value.nombre.match(/^[a-zA-Z]/)) output += "<option selected value='" + value.id_grupo + "|" + value.nombre + "'>" + value.nombre + "</option>";
-            } else {
-                if (value.nombre.match(/^[a-zA-Z]/)) output += "<option value='" + value.id_grupo + "|" + value.nombre + "'>" + value.nombre + "</option>";
-            }
-        });
+        if(aula == "undefined"){
+            output += "<optgroup label='Sin Aula'>";
+            $.each(data.grupos, function (key, value) {
+                if (value.nombre == "GUARD") {
+                    if (value.nombre.match(/^[a-zA-Z]/)) output += "<option selected value='" + value.id_grupo + "|" + value.nombre + "'>" + value.nombre + "</option>";
+                } else {
+                    if (value.nombre.match(/^[a-zA-Z]/)) output += "<option value='" + value.id_grupo + "|" + value.nombre + "'>" + value.nombre + "</option>";
+                }
+            });
+        }
+        
         $("select#grupos_libres").html(output);
     }).fail(function (a, b) {
         cargar_vista_error(error_ajax_jquery(a, b));
