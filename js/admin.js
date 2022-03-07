@@ -145,7 +145,7 @@ function add_grupo(dia, hora, cod_usuario) {
         if (grupo_select[1].match(/^[^a-zA-Z]/) && aula_select[0] == 64) {
             $("#info_add").html("Error: No le ha asignado un grupo a un aula");
         } else {
-            if(data.comprobacion && data.valores.grupo != grupo_select[0] && grupo_select[1].match(/^[^a-zA-Z]/)){
+            if(data.comprobacion && data.valores[0].grupo != grupo_select[0] && grupo_select[1].match(/^[^a-zA-Z]/)){
                 var html_code="<h2 class='centrar'>Confirmación Cambio de Aula del "+dias[dia]+" a "+hora+"º Hora</h2>";
                 html_code+="<p class='centrar'>Has seleccionado un aula que está usada por el profesor ";
                 let list_usuarios = [];
