@@ -260,7 +260,7 @@ function horario($datos){
   function comprobacionAdd($datos){
     try{
       $conexion= new PDO("mysql:host=".SERVIDOR_BD.";dbname=".NOMBRE_BD,USUARIO_BD,CLAVE_BD,array(PDO::MYSQL_ATTR_INIT_COMMAND=>"SET NAMES 'utf8'"));
-      $consulta = "select usuario, grupo, grupos.nombre as grupo_nombre from grupos, horario_lectivo where grupos.id_grupo=horario_lectivo.grupo and dia=? and hora=? and aula=?";
+      $consulta = "select usuario, grupo, grupos.nombre as grupo_nombre from grupos, horario_lectivo where grupos.id_grupo=horario_lectivo.grupo and dia=? and hora=? and aula=? and usuario<>?";
       $sentencia = $conexion->prepare($consulta);
       if($sentencia->execute($datos)){
         if($sentencia->rowCount() > 0){

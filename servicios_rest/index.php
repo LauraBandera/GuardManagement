@@ -103,10 +103,11 @@ $app->get('/horario/{id_usuario}',function($request){
     echo json_encode(aulasOcupadas($datos), JSON_FORCE_OBJECT);
   });
 
-  $app->get('/comprobacionAdd/{dia}/{hora}/{aula}',function($request){
+  $app->get('/comprobacionAdd/{dia}/{hora}/{aula}/{usuario}',function($request){
     $datos[] = $request->getAttribute("dia");
     $datos[] = $request->getAttribute("hora");
     $datos[] = $request->getAttribute("aula");
+    $datos[] = $request->getAttribute("usuario");
   
     echo json_encode(comprobacionAdd($datos), JSON_FORCE_OBJECT);
   });
